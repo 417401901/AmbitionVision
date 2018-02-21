@@ -19,6 +19,7 @@ public:
 		_adjunct = adjunct;
 	};
 	~ArmorDetector();
+	ImageSet(Mat &srcImage);
 private:
 	ArmorAdjunct _adjunct;
 	Mat lightImage;
