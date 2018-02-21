@@ -45,6 +45,9 @@
     <ClCompile Include="GeneratedFiles\qrc_thewindow.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
+    <ClCompile Include="ArmorDetector.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="thewindow.h">
@@ -60,6 +63,9 @@
   <ItemGroup>
     <ClInclude Include="GeneratedFiles\ui_thewindow.h">
       <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ArmorDetector.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
