@@ -2,6 +2,7 @@
 
 bool ArmorDetector::imageSet(Mat &srcImage)
 {
+	RectNum = 0;
 	Mat YCrCbImage, YCrCbImage_b;
 	vector<Mat> channels;
 	srcImage.copyTo(lightImage);
@@ -41,45 +42,129 @@ bool ArmorDetector::imageSet(Mat &srcImage)
 			r1 = Rect(p1, p2);
 		}
 	}
-	
+	r1 &= Rect(Point(0, 0), Point(1280, 720));
 	Mat roiImage(r1.size(),CV_8UC3);
 	roiImage = srcImage(r1);
 //	pyrUp(roiImage, roiImage, Size(roiImage.cols * 2, roiImage.rows * 2));
 
 	cv::split(roiImage, lightImageCH);
 	cv::threshold(lightImageCH.at(0), lightImage_binary, _adjunct.LightThreshold, 255, THRESH_BINARY);
+	cv::threshold(lightImageCH.at(1), lightImage_G, _adjunct.LightThreshold, 255, THRESH_BINARY);
+//	Mat element__ = cv::getStructuringElement(1, cv::Size(3, 3));
+//	cv::morphologyEx(lightImage_binary, lightImage_binary, cv::MORPH_CLOSE, element);
 	
-	
-//	cout << roiImage.size() << r1.size() << endl;
+	cout << r1.size() << endl;
 //	imshow("YCrCb", YCrCbImage_b);
 	
 	
 	ROIrect = r1;
 	vector<vector<Point>> contours2;
-	findContours(lightImage_binary, contours2, CV_RETR_EXTERNAL, CHAIN_APPROX_SIMPLE);
+	findContours(lightImage_G, contours2, CV_RETR_EXTERNAL, CHAIN_APPROX_SIMPLE);
 	vector<vector<Point2i> >::const_iterator it = contours2.begin();
+	Rectall.clear();
+
+	vector<float> l_Vote, r_Vote;
 	while (it != contours2.end()) 
 	{
 		Rect rect = cv::boundingRect(*it);
-		if ((rect.height < 3) ||
-			(rect.height > 7 && rect.width > 0.6 * rect.height + 0.5) ||
-			(rect.height <= 7 && rect.width > 0.9 * rect.height))
+		if ((rect.height < r1.height/14 - 1) ||
+			(rect.height > 14 && rect.width > 0.6 * rect.height + 0.5) ||
+			(rect.height <= 14 && rect.width > 1.5 * rect.height))
 		{
-			++it;
-			continue;
+			it = contours2.erase(it);
 		}
-		rectangle(roiImage, rect, Scalar(rng.uniform(0, 255), rng.uniform(0, 255), rng.uniform(0, 255)), 2);
-		++it;
+		else
+		{
+			//++i;
+			Rectall.insert(Rectall.end(), rect);
+			l_Vote.insert(l_Vote.end(), 0);
+			r_Vote.insert(r_Vote.end(), 0);
+			rectangle(roiImage, Rectall.at(RectNum), Scalar(rng.uniform(0, 0), rng.uniform(80, 125), rng.uniform(80, 255)), 2);
+			cout << RectNum << "个 ：" << Rectall.at(RectNum).height << endl;
+			RectNum++;
+			++it;
+		}
 	}
-	rectangle(srcImage, r1.tl(), r1.br(),
-		Scalar(rng.uniform(0, 255), rng.uniform(0, 255), rng.uniform(0, 255)), 2);
+
+
+//	int l_vote = 0, r_vote = 0;
+//	int l_vote_ = 0, r_vote_ = 0;
+	int RectLnum = 0, RectRnum = 0;
+	for (int j = 0; j < RectNum - 1; j++)
+	{
+		for(int i = j + 1; i < RectNum; i++)
+		{
+			float k1 = getSlope(Rectall.at(j).tl(), Rectall.at(i).tl());
+			float k2 = getSlope(Rectall.at(j).br(), Rectall.at(i).br());
+			cout << "第" << j << "个和第" << i << "个" << "k1:" << k1 << "  k2:" << k2 << endl;
+			if (!((k1<1 && k1>-1) && (k2<1 && k2>-1)))
+				continue;
+			if ((k1-k2) > 0.732 || (k2-k1) > 0.732)
+				continue;
+			
+			if (Rectall.at(j).tl().x > Rectall.at(i).tl().x)
+			{
+				if (k1 > 0)
+				{
+					r_Vote.at(j) += (1 - k1);
+					l_Vote.at(i) += (1 - k1);
+				}
+				else
+				{
+					r_Vote.at(j) += (1 + k1);
+					l_Vote.at(i) += (1 + k1);
+				}
+			}
+			else
+			{
+				if (k1 > 0)
+				{
+					l_Vote.at(j) += (1 - k1);
+					r_Vote.at(i) += (1 - k1);
+				}
+				else
+				{
+					l_Vote.at(j) += (1 + k1);
+					r_Vote.at(i) += (1 + k1);
+				}
+			}
+		}
+	}
+	float l_Vote_Max = 0;
+	float r_Vote_Max = 0;
+	for (int i = 0; i < RectNum; i++)
+	{
+		if (l_Vote.at(i) >= l_Vote_Max)
+		{
+			RectLnum = i;
+			l_Vote_Max = l_Vote.at(i);
+		}
+		if (r_Vote.at(i) >= r_Vote_Max)
+		{
+			RectRnum = i;
+			r_Vote_Max = r_Vote.at(i);
+		}
+	}
+	rectangle(roiImage, Rect(Rectall.at(RectLnum).tl(), Rectall.at(RectRnum).br()), 
+		Scalar(rng.uniform(0, 0), rng.uniform(80, 125), rng.uniform(80, 255)), -1);
+	cout << "L:" << RectLnum << "   R:" << RectRnum << endl;
+	cout << "Lrect:" << l_Vote.at(RectLnum) << "   Rrect:" << r_Vote.at(RectRnum) << endl;
+	//rectangle(srcImage, r1.tl(), r1.br(),
+	//	Scalar(rng.uniform(0, 255), rng.uniform(0, 255), rng.uniform(0, 255)), 2);
 	imshow("roi", roiImage);
-	imshow("阈值化", lightImage_binary);
+//	imshow("阈值化B", lightImage_binary);
+	imshow("阈值化G", lightImage_G);
 	roiImage.release();
 	return true;
 }
 
-
+inline float getSlope(Point& a, Point& b)
+{
+	if (a.x == b.x)
+		return 10.0f;
+	else
+		return (float)(a.y - b.y) / (a.x - b.x);
+}
 
 ArmorDetector::~ArmorDetector()
 {

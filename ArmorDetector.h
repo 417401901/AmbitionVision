@@ -4,6 +4,8 @@
 using namespace cv;
 using namespace std;
 
+inline float getSlope(Point& a, Point& b);
+
 struct ArmorAdjunct
 {
 	uchar LightThreshold;
@@ -27,6 +29,9 @@ private:
 	Mat lightImage;
 	vector<Mat> lightImageCH;
 	Mat lightImage_binary;
+	Mat lightImage_G;
+	int RectNum;
+	vector<Rect> Rectall;
 	Rect ROIrect;
 	Mat lightROI;
 };

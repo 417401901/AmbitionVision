@@ -18,10 +18,10 @@ int main(int argc, char *argv[])
 		cap >> frame;
 		if (!frame.empty())
 		{
-			resize(frame, frame, Size(1024, 576));
+			resize(frame, frame, Size(1280, 720));
 			armordetctor.imageSet(frame);
 			imshow("สำฦต", frame);
-			key = waitKey(10);
+			key = waitKey(40);
 			if (key == 27)
 				break;
 			else if (key == 32)
