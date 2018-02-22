@@ -1,5 +1,6 @@
 #include "thewindow.h"
 #include "opencv2/opencv.hpp"
+#include "ArmorDetector.h"
 //#include <QtWidgets/QApplication>
 using namespace cv;
 int main(int argc, char *argv[])
@@ -9,6 +10,7 @@ int main(int argc, char *argv[])
 	w.show();
 	return a.exec();*/
 	VideoCapture cap;
+	ArmorDetector armordetctor;
 	while (true)
 	{
 		Mat frame;
@@ -16,9 +18,10 @@ int main(int argc, char *argv[])
 		cap >> frame;
 		if (!frame.empty())
 		{
-			resize(frame, frame, Size(1280, 720));
+			resize(frame, frame, Size(1024, 576));
+			armordetctor.imageSet(frame);
 			imshow("สำฦต", frame);
-			key = waitKey(30);
+			key = waitKey(10);
 			if (key == 27)
 				break;
 			else if (key == 32)

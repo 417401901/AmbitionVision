@@ -1,13 +1,15 @@
 #pragma once
 #include "opencv2/opencv.hpp"
+#include "iostream"
 using namespace cv;
+using namespace std;
 
 struct ArmorAdjunct
 {
 	uchar LightThreshold;
 	ArmorAdjunct()
 	{
-		LightThreshold = 210;
+		LightThreshold = 220;
 	}
 };
 
@@ -19,10 +21,13 @@ public:
 		_adjunct = adjunct;
 	};
 	~ArmorDetector();
-	ImageSet(Mat &srcImage);
+bool imageSet(Mat &srcImage);
 private:
 	ArmorAdjunct _adjunct;
 	Mat lightImage;
+	vector<Mat> lightImageCH;
 	Mat lightImage_binary;
+	Rect ROIrect;
+	Mat lightROI;
 };
 
