@@ -21,7 +21,7 @@ int main(int argc, char *argv[])
 			resize(frame, frame, Size(1280, 720));
 			armordetctor.imageSet(frame);
 			imshow("สำฦต", frame);
-			key = waitKey(40);
+			key = waitKey(1);
 			if (key == 27)
 				break;
 			else if (key == 32)

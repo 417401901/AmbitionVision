@@ -5,7 +5,8 @@ using namespace cv;
 using namespace std;
 
 inline float getSlope(Point& a, Point& b);
-
+inline Point getCenterPoint(Rect &rect);
+inline Rect getRectAandB(Rect &A, Rect &B);
 struct ArmorAdjunct
 {
 	uchar LightThreshold;
@@ -23,7 +24,7 @@ public:
 		_adjunct = adjunct;
 	};
 	~ArmorDetector();
-bool imageSet(Mat &srcImage);
+	bool imageSet(Mat &srcImage);
 private:
 	ArmorAdjunct _adjunct;
 	Mat lightImage;
@@ -32,6 +33,7 @@ private:
 	Mat lightImage_G;
 	int RectNum;
 	vector<Rect> Rectall;
+	vector<Rect> RectScelet;
 	Rect ROIrect;
 	Mat lightROI;
 };
